@@ -1,27 +1,30 @@
-FROM gitpod/workspace-full
+# Use a base image with Java and Maven for building the application
+FROM maven:3.8-openjdk-17 AS build
 
-RUN sudo wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-RUN sudo apt-get -q update
-RUN sudo apt -y install ./google-chrome-stable_current_amd64.deb
-RUN sudo apt-get -y install libnss3\
-          libnspr4\
-          libatk1.0-0\
-          libatk-bridge2.0-0\
-          libcups2\
-          libdrm2\
-          libxkbcommon0\
-          libxcomposite1\
-          libxdamage1\
-          libxfixes3\
-          libxrandr2\
-          libgbm1\
-          libgtk-3-0\
-          libatspi2.0-0\
-          libx11-xcb-dev
-RUN sudo rm -rf /var/lib/apt/lists/*
+# Set the working directory
+WORKDIR /app
 
-RUN bash -c ". /home/gitpod/.sdkman/bin/sdkman-init.sh \
-    && sdk update \
-    && sdk install java 11.0.9-amzn \
-    && sdk install java 11.0.9-trava \
-    && sdk default java 11.0.9-amzn" 
+# Copy the pom.xml and download dependencies
+COPY pom.xml .
+RUN mvn dependency:go-offline -Pproduction
+
+# Copy the rest of the application source code
+COPY src ./src
+
+# Build the application with the production profile and create a JAR file
+RUN mvn clean package -Pproduction -DskipTests
+
+# Use a slim Java image for the final application
+FROM openjdk:17-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the JAR file from the build stage
+COPY --from=build /app/target/*.jar app.jar
+
+# Expose the application port (default for Spring Boot is 8080)
+EXPOSE 8080
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]
