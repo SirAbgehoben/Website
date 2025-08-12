@@ -1,9 +1,7 @@
 package org.abgehoben;
 
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.dom.Style;
@@ -29,8 +27,7 @@ public class MainView extends VerticalLayout {
                         .setWidth("50px")
                         .setHeight("50px")
                         .setMargin("10px")
-                        .setZIndex(4)
-                        .setPosition(Style.Position.ABSOLUTE);
+                        .setZIndex(4);
         add(branding);
 
         ProfileContainer profileContainer = new ProfileContainer();
