@@ -1,6 +1,7 @@
 package org.abgehoben;
 
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.server.AppShellSettings;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 import org.springframework.boot.SpringApplication;
@@ -18,5 +19,13 @@ public class Application implements AppShellConfigurator {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
+    }
+
+    @Override
+    public void configurePage(AppShellSettings settings) {
+        settings.setPageTitle("Abgehoben");
+        settings.addMetaTag("author", "SirAbgehoben");
+        settings.addFavIcon("icon", "icons/icon.svg", "192x192");
+        settings.addLink("shortcut icon", "icons/favicon.ico");
     }
 }
