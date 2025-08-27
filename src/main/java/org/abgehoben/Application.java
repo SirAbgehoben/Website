@@ -12,7 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @PWA(name = "Abgehoben",
         shortName = "Abgehoben",
         description = "My personal website. I'm passionate about coding in Java and self-hosting, which powers this site and my custom Minecraft network, AbgehobenNetwork. And I use Arch btw.",
-        iconPath = "images/Abgehoben.svg",
+        iconPath = "icons/Abgehoben.svg",
         backgroundColor = "#000000")
 @Theme("my-theme")
 public class Application implements AppShellConfigurator {
@@ -26,6 +26,6 @@ public class Application implements AppShellConfigurator {
         settings.setPageTitle("Abgehoben");
         settings.addMetaTag("author", "SirAbgehoben");
         settings.addFavIcon("icon", "icons/icon.svg", "192x192");
-        settings.addLink("shortcut icon", "icons/favicon.ico");
+        settings.addLink("shortcut icon", "icons/icon.svg");
     }
 }
