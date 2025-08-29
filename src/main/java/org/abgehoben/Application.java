@@ -12,7 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @PWA(name = "Abgehoben",
         shortName = "Abgehoben",
         description = "My personal website. I'm passionate about coding in Java and self-hosting, which powers this site and my custom Minecraft network, AbgehobenNetwork. And I use Arch btw.",
-        iconPath = "icons/icon.svg",
+        iconPath = "icons/favicon.png",
         backgroundColor = "#000000")
 @Theme("my-theme")
 public class Application implements AppShellConfigurator {
