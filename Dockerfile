@@ -15,7 +15,7 @@ COPY src ./src
 RUN mvn clean package -Pproduction -DskipTests
 
 # Use a slim Java image for the final application
-FROM eclipse-temurin:17-jre-slim
+FROM eclipse-temurin:17-jre-ubi9-minimal
 
 # Set the working directory
 WORKDIR /app
