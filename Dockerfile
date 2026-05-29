@@ -6,16 +6,16 @@ WORKDIR /app
 
 # Copy the pom.xml and download dependencies
 COPY pom.xml .
-RUN mvn dependency:go-offline -Pproduction
+RUN mvn dependency:go-offline
 
 # Copy the entire application source code
 COPY . .
 
 # Build the application with the production profile and create a JAR file
-RUN mvn clean package -Pproduction -DskipTests
+RUN mvn clean package -DskipTests
 
 # Use a slim Java 25 image for the final application
-FROM eclipse-temurin:25-jre-ubi9-minimal
+FROM eclipse-temurin:25-jre-alpine
 
 # Set the working directory
 WORKDIR /app
