@@ -523,6 +523,10 @@ var pJS = function(tag_id, params){
       /* move the particle */
       if(pJS.particles.move.enable){
         var ms = pJS.particles.move.speed/2;
+
+        p.vx *= 0.96; //drag horizontal
+        p.vy *= 0.96; //drag vertical
+        p.vy += -0.04; //weight
         p.x += p.vx * ms;
         p.y += p.vy * ms;
       }
@@ -590,7 +594,10 @@ var pJS = function(tag_id, params){
         case 'bounce':
           if (p.x + p.radius > pJS.canvas.w) p.vx = -p.vx;
           else if (p.x - p.radius < 0) p.vx = -p.vx;
-          if (p.y + p.radius > pJS.canvas.h) p.vy = -p.vy;
+          if (p.y + p.radius > pJS.canvas.h) {
+            p.vy = -p.vy * 0.8;
+            p.y = pJS.canvas.h - p.radius;
+          }
           else if (p.y - p.radius < 0) p.vy = -p.vy;
         break;
       }
@@ -641,8 +648,18 @@ var pJS = function(tag_id, params){
     /* clear canvas */
     pJS.canvas.ctx.clearRect(0, 0, pJS.canvas.w, pJS.canvas.h);
 
+    var now = Date.now();
+    pJS.tmp.time = pJS.tmp.time || now;
+    pJS.tmp.accumulator = (pJS.tmp.accumulator || 0) + (now - pJS.tmp.time);
+    pJS.tmp.time = now;
+
+    if (pJS.tmp.accumulator > 50) pJS.tmp.accumulator = 50;
+
     /* update each particles param */
-    pJS.fn.particlesUpdate();
+    while (pJS.tmp.accumulator >= 16.666) {
+      pJS.fn.particlesUpdate();
+      pJS.tmp.accumulator -= 16.666;
+    }
 
     /* draw each particle */
     for(var i = 0; i < pJS.particles.array.length; i++){

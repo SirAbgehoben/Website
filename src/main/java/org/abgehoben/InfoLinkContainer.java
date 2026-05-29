@@ -1,7 +1,6 @@
 package org.abgehoben;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -38,8 +37,6 @@ public class InfoLinkContainer extends HorizontalLayout {
                 .setMargin("0px 5px 0 5px");
         add(infoName);
 
-        addClickListener(event -> {
-            UI.getCurrent().getPage().open(href);
-        });
+        addClickListener(_ -> UI.getCurrent().getPage().open(href));
     }
 }

@@ -1,5 +1,5 @@
-# Use a base image with Java and Maven for building the application
-FROM maven:3.8-openjdk-17 AS build
+# Use a base image with Java 25 and Maven for building the application
+FROM maven:3.9-eclipse-temurin-25 AS build
 
 # Set the working directory
 WORKDIR /app
@@ -8,14 +8,14 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -Pproduction
 
-# Copy the rest of the application source code
-COPY src ./src
+# Copy the entire application source code
+COPY . .
 
 # Build the application with the production profile and create a JAR file
 RUN mvn clean package -Pproduction -DskipTests
 
-# Use a slim Java image for the final application
-FROM eclipse-temurin:17-jre-ubi9-minimal
+# Use a slim Java 25 image for the final application
+FROM eclipse-temurin:25-jre-ubi9-minimal
 
 # Set the working directory
 WORKDIR /app

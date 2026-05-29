@@ -1,2 +1,6 @@
 # Project exclude paths
 /target/
+node_modules/
+frontend/generated/
+vite.generated.ts
+dev-bundle/
