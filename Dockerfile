@@ -12,7 +12,7 @@ RUN mvn dependency:go-offline
 COPY . .
 
 # Build the application with the production profile and create a JAR file
-RUN mvn clean package -DskipTests
+RUN mvn clean package -Dmaven.test.skip=true
 
 # Use a slim Java 25 image for the final application
 FROM eclipse-temurin:25-jre-alpine
