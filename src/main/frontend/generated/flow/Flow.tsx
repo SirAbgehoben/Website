@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,6 +29,10 @@ const router = {
     }
 };
 
+const flowReact : { active: boolean } = {
+    active: false,
+}
+
 // ClickHandler for vaadin-router-go event is copied from vaadin/router click.js
 // @ts-ignore
 function getAnchorOrigin(anchor) {
@@ -55,7 +59,7 @@ function normalizeURL(url: URL): void | string {
     return '/' + url.href.slice(document.baseURI.length);
 }
 
-function extractPath(event: MouseEvent): void | string {
+function extractURL(event: MouseEvent): void | URL {
     // ignore the click if the default action is prevented
     if (event.defaultPrevented) {
         return;
@@ -131,8 +135,44 @@ function extractPath(event: MouseEvent): void | string {
         return;
     }
 
-    return normalizeURL(new URL(anchor.href, anchor.baseURI));
+    return new URL(anchor.href, anchor.baseURI);
 }
+
+function extractPath(event: MouseEvent): void | string {
+    const url = extractURL(event);
+    if (!url) {
+        return;
+    }
+    return normalizeURL(url);
+}
+
+export const registerGlobalClickHandler = () => {
+    window.addEventListener('click', (event: MouseEvent) => {
+        if (flowReact.active) {
+            return;
+        }
+        const url = extractURL(event);
+        if (!url) {
+            return;
+        }
+        // ignore click if baseURI does not match the document (external)
+        if (!url.href.startsWith(document.baseURI)) {
+            return;
+        }
+        if (event && event.preventDefault) {
+            event.preventDefault();
+        }
+
+        // Normalize path against baseURI
+        const path = url.pathname + url.search + url.hash;
+        const state = {...window.history.state}
+        if (state.idx !== undefined) {
+            state.idx = state.idx + 1;
+        }
+        window.history.pushState(state, '', path);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+    }, { capture: false });
+};
 
 /**
  * Fire 'vaadin-navigated' event to inform components of navigation.
@@ -237,6 +277,7 @@ type NavigateOpts = {
 
 type NavigateFn = (to: string, callback: boolean, opts?: NavigateOptions) => void;
 
+let navigateInProgress = false;
 /**
  * A hook providing the `navigate(path: string, opts?: NavigateOptions)` function
  * with React Router API that has more consistent history updates. Uses internal
@@ -251,6 +292,11 @@ function useQueuedNavigate(
     const [navigateQueueLength, setNavigateQueueLength] = useState(0);
 
     const dequeueNavigation = useCallback(() => {
+        if (navigateInProgress) {
+            dequeueNavigationAfterCurrentTask();
+            return;
+        }
+
         const navigateArgs = navigateQueue.shift();
         if (navigateArgs === undefined) {
             // Empty queue, do nothing.
@@ -263,6 +309,7 @@ function useQueuedNavigate(
                 waitReference.current = undefined;
             }
             navigated.current = !navigateArgs.callback;
+            navigateInProgress = true;
             navigate(navigateArgs.to, navigateArgs.opts);
             setNavigateQueueLength(navigateQueue.length);
         };
@@ -270,7 +317,7 @@ function useQueuedNavigate(
     }, [navigate, setNavigateQueueLength]);
 
     const dequeueNavigationAfterCurrentTask = useCallback(() => {
-        queueMicrotask(dequeueNavigation);
+        setTimeout(dequeueNavigation, 0);
     }, [dequeueNavigation]);
 
     const enqueueNavigation = useCallback(
@@ -298,6 +345,11 @@ function useQueuedNavigate(
 
     return enqueueNavigation;
 }
+
+const flowNavigation = () => {
+  // @ts-ignore
+  window.Vaadin.Flow.navigation = true;
+};
 
 function Flow() {
     const ref = useRef<HTMLOutputElement>(null);
@@ -352,11 +404,12 @@ function Flow() {
             if (event && event.preventDefault) {
                 event.preventDefault();
             }
-
             navigated.current = false;
             // When navigation is triggered by click on a link, fromAnchor is set to true
             // in order to get a server round-trip even when navigating to the same URL again
             fromAnchor.current = true;
+            // @ts-ignore
+            window.Vaadin.Flow.navigation = true;
             navigate(path);
             // Dispatch close event for overlay drawer on click navigation.
             window.dispatchEvent(new CustomEvent('close-overlay-drawer'));
@@ -417,10 +470,19 @@ function Flow() {
     }, [vaadinRouterGoEventHandler, vaadinNavigateEventHandler]);
 
     useEffect(() => {
+        // @ts-ignore
+        window.addEventListener("popstate", flowNavigation);
+        window.addEventListener('click', navigateEventHandler);
+        flowReact.active = true;
+
         return () => {
             containerRef.current?.parentNode?.removeChild(containerRef.current);
             containerRef.current?.removeEventListener('flow-portal-add', addPortalEventHandler as EventListener);
             containerRef.current = undefined;
+            // @ts-ignore
+            window.removeEventListener("popstate", flowNavigation);
+            window.removeEventListener('click', navigateEventHandler);
+            flowReact.active = false;
         };
     }, []);
 
@@ -455,6 +517,7 @@ function Flow() {
             if (navigated.current && !fromAnchor.current) {
                 blocker.proceed();
                 blockingPromise.resolve();
+                navigateInProgress = false;
                 return;
             }
             fromAnchor.current = false;
@@ -472,12 +535,14 @@ function Flow() {
                         prevent() {
                             blocker.reset();
                             blockingPromise.resolve();
+                            navigateInProgress = false;
                             navigated.current = false;
                         },
                         redirect,
                         continue() {
                             blocker.proceed();
                             blockingPromise.resolve();
+                            navigateInProgress = false;
                         }
                     },
                     router
@@ -501,16 +566,17 @@ function Flow() {
                         containerRef.current.serverConnected = (cancel) => {
                             if (cancel) {
                                 blocker.reset();
-                                blockingPromise.resolve();
                             } else {
                                 blocker.proceed();
-                                blockingPromise.resolve();
                             }
+                            blockingPromise.resolve();
+                            navigateInProgress = false;
                         };
                     } else {
                         // permitted navigation: proceed with the blocker
                         blocker.proceed();
                         blockingPromise.resolve();
+                        navigateInProgress = false;
                     }
                 });
             }
@@ -533,12 +599,12 @@ function Flow() {
                 if (outlet && outlet !== container.parentNode) {
                     outlet.append(container);
                     container.addEventListener('flow-portal-add', addPortalEventHandler as EventListener);
-                    window.addEventListener('click', navigateEventHandler);
                     containerRef.current = container;
                 }
                 return container.onBeforeEnter?.call(
                     container,
-                    { pathname: location.pathname, search: location.search },
+                  // Always add base to path as it is cleaned in getFlowRoutePath and will break a route starting with basename
+                    { pathname: basename + location.pathname, search: location.search },
                     {
                         prevent,
                         redirect,
