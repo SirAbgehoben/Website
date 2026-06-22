@@ -29,5 +29,6 @@ public class Application implements AppShellConfigurator {
         settings.addMetaTag("author", "SirAbgehoben");
         settings.addFavIcon("icon", "icons/icon.svg", "192x192");
         settings.addLink("shortcut icon", "icons/icon.svg");
+        settings.addLink("me", "https://mastodon.social/@SirAbgehoben");
     }
 }
