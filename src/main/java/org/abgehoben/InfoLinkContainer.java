@@ -1,16 +1,14 @@
 package org.abgehoben;
 
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.dom.Style;
 
-public class InfoLinkContainer extends HorizontalLayout {
+public class InfoLinkContainer extends Anchor {
     public InfoLinkContainer(String iconPath, String type, String href) {
-        setSpacing(false);
-        setMargin(false);
-        setPadding(false);
-        setAlignItems(Alignment.CENTER);
+        super(href, "");
+        setTarget("_blank");
         addClassName("info-link-button");
 
         getStyle().setZIndex(2)
@@ -19,7 +17,10 @@ public class InfoLinkContainer extends HorizontalLayout {
                 .setBorderRadius("50px")
                 .setBorder("2px #303335 solid")
                 .setCursor("pointer")
-                .set("pointer-events", "auto");
+                .set("pointer-events", "auto")
+                .setTextDecoration("none")
+                .setAlignItems(Style.AlignItems.CENTER)
+                .setDisplay(Style.Display.FLEX);
 
         Image image = new Image(iconPath, type);
         image.getStyle().setColor("white")
@@ -36,7 +37,5 @@ public class InfoLinkContainer extends HorizontalLayout {
                 .setLineHeight("15px")
                 .setMargin("0px 5px 0 5px");
         add(infoName);
-
-        addClickListener(_ -> UI.getCurrent().getPage().open(href));
     }
 }
