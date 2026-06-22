@@ -38,10 +38,12 @@ public class MainView extends VerticalLayout {
         infoLinkLayout.setWrap(true);
         infoLinkLayout.setSpacing("4px");
         infoLinkLayout.setAlignItems(Alignment.CENTER);
+        infoLinkLayout.setJustifyContentMode(JustifyContentMode.CENTER);
         infoLinkLayout.getStyle().setMarginTop("10px");
 
         infoLinkLayout.add(new InfoLinkContainer("icons/github.svg", "GitHub", "https://github.com/SirAbgehoben"));
         infoLinkLayout.add(new InfoLinkContainer("icons/bluesky.svg", "Bluesky", "https://bsky.app/profile/abgehoben.org"));
+        infoLinkLayout.add(new InfoLinkContainer("icons/mastodon.svg", "Mastodon", "https://mastodon.social/@SirAbgehoben"));
         infoLinkLayout.add(new InfoLinkContainer("icons/discord.svg", "Discord", "https://Discord.abgehoben.org"));
         infoLinkLayout.add(new InfoLinkContainer("icons/email.svg", "Email", "mailto:admin@abgehoben.org"));
 
