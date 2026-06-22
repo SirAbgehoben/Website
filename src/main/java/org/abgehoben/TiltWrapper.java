@@ -25,12 +25,33 @@ public class TiltWrapper extends Component implements HasComponents {
         super.onAttach(attachEvent);
 
         // Pass configuration options as a second argument to VanillaTilt.init().
-        getElement().executeJs("VanillaTilt.init(this, { " +
-                "max: 8, " +
-                "speed: 1000, " +
-                "reverse: true, " +
-                "glare: false, " +
-                "'max-glare': 0.8 " +
-                "});");
+        getElement().executeJs("""
+                const isTouch = window.matchMedia('(pointer: coarse)').matches;
+                
+                if (isTouch) {
+                  VanillaTilt.init(this, {
+                  max: 8,
+                  speed: 1000,
+                  reverse: true,
+                  glare: false,
+                  'max-glare': 0.8,
+                  gyroscope: true,
+                  gyroscopeMinAngleX: -45,
+                  gyroscopeMaxAngleX: 45,
+                  gyroscopeMinAngleY: -45,
+                  gyroscopeMaxAngleY: 45,
+                  gyroscopeSamples: 10,
+                  gyroscopeSensitivity: 0.5,
+                  });
+                } else {
+                  VanillaTilt.init(this, {
+                  max: 8,
+                  speed: 1000,
+                  reverse: true,
+                  glare: false,
+                  'max-glare': 0.8
+                  });
+                }
+                """);
     }
 }
