@@ -14,7 +14,7 @@
     "lit": "3.3.2",
     "react": "19.2.6",
     "react-dom": "19.2.6",
-    "react-router": "7.14.2"
+    "react-router": "7.18.2"
   },
   "devDependencies": {
     "@babel/core": "7.29.0",
@@ -56,7 +56,7 @@
       "lit": "3.3.2",
       "react": "19.2.6",
       "react-dom": "19.2.6",
-      "react-router": "7.14.2"
+      "react-router": "7.18.2"
     },
     "devDependencies": {
       "@babel/core": "7.29.0",
